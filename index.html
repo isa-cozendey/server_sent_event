@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel de Monitoramento SSE</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #121214;
+            color: #e1e1e6;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+        }
+        h1 { color: #04d361; }
+        .dashboard {
+            display: flex;
+            gap: 20px;
+            margin-top: 20px;
+        }
+        .card {
+            background-color: #202024;
+            padding: 20px 40px;
+            border-radius: 8px;
+            border: 1px solid #323238;
+            text-align: center;
+            min-width: 150px;
+        }
+        .card h3 { margin: 0 0 10px 0; color: #8d8d99; }
+        .value { font-size: 2rem; font-weight: bold; color: #fff; }
+        .status { margin-top: 30px; font-size: 0.9rem; color: #7c7c8a; }
+    </style>
+</head>
+<body>
+
+    <h1>Server Status Monitor (SSE)</h1>
+    <p>Dados atualizados em tempo real diretamente do backend.</p>
+
+    <div class="dashboard">
+        <div class="card">
+            <h3>Uso de CPU</h3>
+            <div id="cpu-value" class="value">0%</div>
+        </div>
+        <div class="card">
+            <h3>Uso de Memória</h3>
+            <div id="memory-value" class="value">0%</div>
+        </div>
+    </div>
+
+    <div class="status" id="status-timestamp">Aguardando dados...</div>
+
+    <script>
+        const eventSource = new EventSource('/metrics');
+
+        const cpuElement = document.getElementById('cpu-value');
+        const memoryElement = document.getElementById('memory-value');
+        const timestampElement = document.getElementById('status-timestamp');
+
+        eventSource.onmessage = function(event) {
+            
+            const metrics = JSON.parse(event.data);
+
+            cpuElement.innerText = `${metrics.cpu}%`;
+            memoryElement.innerText = `${metrics.memory}%`;
+            timestampElement.innerText = `Última atualização: ${metrics.timestamp}`;
+        };
+
+        eventSource.onerror = function(err) {
+            console.error("Erro na conexão SSE:", err);
+            timestampElement.innerText = "Tentando reconectar ao servidor...";
+            cpuElement.innerText = "---";
+            memoryElement.innerText = "---";
+        };
+    </script>
+</body>
+</html>
