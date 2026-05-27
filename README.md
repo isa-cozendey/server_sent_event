@@ -1,1 +1,7 @@
-# server_sent_event
+# Teste
+
+```
+npm init -y
+npm install express
+
+node server.js
